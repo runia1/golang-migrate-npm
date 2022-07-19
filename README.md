@@ -2,7 +2,7 @@
 
 ## Description
 
-An npm package that isntalls the golang-migrate binary as an npm dependency
+An npm package that installs the golang-migrate binary as an npm dependency
 
 ## Install
 
