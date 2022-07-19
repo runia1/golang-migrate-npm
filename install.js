@@ -1,6 +1,5 @@
 const https = require("https");
 const tar = require("tar");
-const zlib = require("zlib");
 const StreamZip = require("node-stream-zip");
 const fs = require("fs");
 
@@ -62,7 +61,7 @@ const package = require("./package.json");
           const zip = new StreamZip({ file: `./bin/${id}` });
           zip.on("ready", () => {
             zip.extract("migrate.exe", "./bin/migrate", (err) => {
-              console.log(err ? "Extract error" : "Extracted");
+              console.debug(err ? "Extract error" : "Extracted");
               zip.close();
             });
           });
@@ -71,6 +70,6 @@ const package = require("./package.json");
       }
     })
     .on("error", (e) => {
-      console.log("Failed to download", e);
+      console.debug("Failed to download", e);
     });
 })();
