@@ -1,13 +1,17 @@
 {
   "name": "golang-migrate-npm",
-  "version": "1.0.0",
+  "version": "4.15.2",
   "description": "An npm package that wraps the golang-migrate binary",
-  "bin": "",
+  "bin": "bin/migrate",
   "scripts": {
-    "install": ""
+    "install": "install.js"
   },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/runia1/golang-migrate-npm"
+  },
+  "dependencies": {
+    "node-stream-zip": "^1.15.0",
+    "tar": "^6.1.11"
   }
 }
