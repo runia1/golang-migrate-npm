@@ -6,7 +6,7 @@ const StreamZip = require("node-stream-zip");
 const fs = require("fs");
 const path = require("path");
 
-const package = require("./package.json");
+const package = require("package.json");
 
 (async () => {
   // map package version to golang-migrate version
@@ -35,56 +35,64 @@ const package = require("./package.json");
   const url = `https://github.com/golang-migrate/migrate/releases/download/v${version}/migrate.${id}`;
   console.debug(`Downloading golang-migrate from ${url}`);
 
-  const location = await new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
-        resolve(res.headers.location);
-      })
-      .on("error", (e) => {
-        reject(e);
-      });
-  });
-
-  await new Promise((resolve, reject) => {
-    https
-      .get(location, (downloadStream) => {
-        if (id.endsWith(".tar.gz")) {
-          const fileStream = tar.extract(
-            {
-              C: "./bin",
-              onwarn: (message) => reject(message),
-            },
-            ["migrate"]
-          );
-
-          fileStream.on("close", resolve);
-
-          downloadStream.pipe(fileStream);
-        } else {
-          const fileStream = fs.createWriteStream(`./bin/${id}`);
-          downloadStream.pipe(fileStream);
-          fileStream.on("close", () => {
-            const zip = new StreamZip({ file: `./bin/${id}` });
-            zip.on("ready", () => {
-              zip.extract("migrate.exe", "./bin/migrate", (err) => {
-                zip.close();
-                resolve();
-              });
-            });
-            zip.on("error", (err) => console.log(err));
-          });
-        }
-      })
-      .on("error", (e) => {
-        reject(e);
-      });
-  });
-
-  // create the symlink to node_modules/.bin/golang-migrate
   try {
+    const location = await new Promise((resolve, reject) => {
+      https
+        .get(url, (res) => {
+          resolve(res.headers.location);
+        })
+        .on("error", (e) => {
+          reject(e);
+        });
+    });
+
+    await new Promise((resolve, reject) => {
+      https
+        .get(location, (downloadStream) => {
+          if (id.endsWith(".tar.gz")) {
+            const fileStream = tar.extract(
+              {
+                C: path.join(__dirname, "bin"),
+                onwarn: (message) => reject(message),
+              },
+              ["migrate"]
+            );
+
+            fileStream.on("close", resolve);
+
+            downloadStream.pipe(fileStream);
+          } else {
+            const fileStream = fs.createWriteStream(
+              path.join(__dirname, "bin", id)
+            );
+            downloadStream.pipe(fileStream);
+            fileStream.on("close", () => {
+              const zip = new StreamZip({
+                file: path.join(__dirname, "bin", id),
+              });
+              zip.on("ready", () => {
+                zip.extract(
+                  "migrate.exe",
+                  path.join(__dirname, "bin", "migrate"),
+                  (err) => {
+                    zip.close();
+                    resolve();
+                  }
+                );
+              });
+              zip.on("error", (e) => reject(e));
+            });
+          }
+        })
+        .on("error", (e) => {
+          reject(e);
+        });
+    });
+
+    // create the symlink to node_modules/.bin/golang-migrate
     fs.symlinkSync(
       path.join(__dirname, "bin", "migrate"),
-      path.join(__dirname, "..", ".bin", "gloang-migrate"),
+      path.join(__dirname, "..", ".bin", "golang-migrate"),
       "file"
     );
   } catch (e) {
