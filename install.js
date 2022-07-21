@@ -6,7 +6,7 @@ const StreamZip = require("node-stream-zip");
 const fs = require("fs");
 const path = require("path");
 
-const package = require("package.json");
+const package = require("./package.json");
 
 (async () => {
   // map package version to golang-migrate version
