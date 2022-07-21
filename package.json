@@ -2,7 +2,6 @@
   "name": "golang-migrate",
   "version": "4.15.2",
   "description": "An npm package that wraps the golang-migrate binary",
-  "bin": "./bin/migrate",
   "scripts": {
     "install": "./install.js"
   },

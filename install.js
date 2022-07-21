@@ -4,6 +4,7 @@ const https = require("https");
 const tar = require("tar");
 const StreamZip = require("node-stream-zip");
 const fs = require("fs");
+const path = require("path");
 
 const package = require("./package.json");
 
@@ -44,34 +45,49 @@ const package = require("./package.json");
       });
   });
 
-  https
-    .get(location, (downloadStream) => {
-      if (id.endsWith(".tar.gz")) {
-        const fileStream = tar.extract(
-          {
-            C: "./bin",
-            onwarn: (message) => console.log(message),
-          },
-          ["migrate"]
-        );
+  await new Promise((resolve, reject) => {
+    https
+      .get(location, (downloadStream) => {
+        if (id.endsWith(".tar.gz")) {
+          const fileStream = tar.extract(
+            {
+              C: "./bin",
+              onwarn: (message) => reject(message),
+            },
+            ["migrate"]
+          );
 
-        downloadStream.pipe(fileStream);
-      } else {
-        const fileStream = fs.createWriteStream(`./bin/${id}`);
-        downloadStream.pipe(fileStream);
-        fileStream.on("close", () => {
-          const zip = new StreamZip({ file: `./bin/${id}` });
-          zip.on("ready", () => {
-            zip.extract("migrate.exe", "./bin/migrate", (err) => {
-              console.debug(err ? "Extract error" : "Extracted");
-              zip.close();
+          fileStream.on("close", resolve);
+
+          downloadStream.pipe(fileStream);
+        } else {
+          const fileStream = fs.createWriteStream(`./bin/${id}`);
+          downloadStream.pipe(fileStream);
+          fileStream.on("close", () => {
+            const zip = new StreamZip({ file: `./bin/${id}` });
+            zip.on("ready", () => {
+              zip.extract("migrate.exe", "./bin/migrate", (err) => {
+                zip.close();
+                resolve();
+              });
             });
+            zip.on("error", (err) => console.log(err));
           });
-          zip.on("error", (err) => console.log(err));
-        });
-      }
-    })
-    .on("error", (e) => {
-      console.debug("Failed to download", e);
-    });
+        }
+      })
+      .on("error", (e) => {
+        reject(e);
+      });
+  });
+
+  // create the symlink to node_modules/.bin/golang-migrate
+  try {
+    fs.symlinkSync(
+      path.join(__dirname, "bin", "migrate"),
+      path.join(__dirname, "..", ".bin", "gloang-migrate"),
+      "file"
+    );
+  } catch (e) {
+    console.log(e);
+  }
 })();
