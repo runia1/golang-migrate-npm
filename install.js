@@ -10,7 +10,8 @@ const package = require("./package.json");
 
 (async () => {
   // map package version to golang-migrate version
-  const version = package.version;
+  // omitting any annotations on the version, i.e. 4.15.2-rc1
+  const version = package.version.split('-')[0];
 
   const platform = process.platform;
   const arch = process.arch;
