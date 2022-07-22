@@ -90,11 +90,16 @@ const package = require("./package.json");
     });
 
     // create the symlink to node_modules/.bin/golang-migrate
-    fs.symlinkSync(
-      path.join(__dirname, "bin", "migrate"),
-      path.join(__dirname, "..", ".bin", "golang-migrate"),
-      "file"
+    const node_modules_bin = path.join(
+      __dirname,
+      "..",
+      ".bin",
+      "golang-migrate"
     );
+    const local_bin = path.join(__dirname, "bin", "migrate");
+    const target = path.relative(node_modules_bin, local_bin);
+
+    fs.symlinkSync(target, node_modules_bin, "file");
   } catch (e) {
     console.log(e);
   }
