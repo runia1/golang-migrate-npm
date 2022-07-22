@@ -4,7 +4,7 @@
   "description": "An npm package that wraps the golang-migrate binary",
   "bin": "bin/migrate",
   "scripts": {
-    "install": "install.js"
+    "install": "node install.js"
   },
   "license": "MIT",
   "repository": {
