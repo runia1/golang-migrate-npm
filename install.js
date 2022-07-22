@@ -64,8 +64,10 @@ const finished = promisify(stream.finished);
       });
 
       zip.on("ready", () => {
-        zip.extract("migrate.exe", path.join(__dirname, "bin", "migrate"), () =>
-          zip.close()
+        zip.extract(
+          "migrate.exe",
+          path.join(__dirname, "bin", "migrate.exe"),
+          () => zip.close()
         );
       });
 

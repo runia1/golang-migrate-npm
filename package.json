@@ -1,6 +1,6 @@
 {
   "name": "golang-migrate-cli",
-  "version": "4.15.2",
+  "version": "4.15.2-rc.1",
   "description": "An npm package that wraps the golang-migrate binary",
   "bin": "bin/migrate",
   "scripts": {
